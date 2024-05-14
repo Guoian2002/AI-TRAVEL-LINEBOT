@@ -1,4 +1,3 @@
-
 from src.mongodb import mongodb
 from src.service.website import Website, WebsiteReader
 from src.service.youtube import Youtube, YoutubeTranscriptReader
@@ -44,14 +43,16 @@ youtube = Youtube(step=4)
 website = Website()
 
 memory = Memory(system_message=os.getenv(
-    'SYSTEM_MESSAGE'), memory_message_count=3)
+    'SYSTEM_MESSAGE'), memory_message_count=2)
 model_management = {}
 api_keys = {}
 # chat = True
 place_array = ["士林區", "大同區", "信義區", "北投區", "文山區", "大安區", "中正區", "內湖區", "松山區", "中山區"]
 user_states = {}
+user_messages = {}
+assistant_messages = {}
 MAX_CHARS = 150
-user_next_indices = {} 
+user_next_indices = {}  # 追蹤每位用戶已經發送的訊息字數
 
 
 @app.route("/callback", methods=['POST'])
@@ -158,6 +159,21 @@ def get_trusted_person(user_id):
     conn.close()
 
     return result
+# 語音輸出測試
+# def synthesize_text_to_speech(text, language='zh-TW'):
+#     tts = gTTS(text=text, lang=language)
+#     output_audio_path = f"{str(uuid.uuid4())}.mp3"
+#     tts.save(output_audio_path)
+#     return output_audio_path
+
+# def upload_to_cloud_storage(file_path, bucket_name):
+#     storage_client = storage.Client()
+#     bucket = storage_client.get_bucket(bucket_name)
+#     file_name = os.path.basename(file_path)
+#     blob = bucket.blob(file_name)
+#     blob.upload_from_filename(file_path)
+#     file_url = f"https://storage.googleapis.com/{bucket_name}/{file_name}"
+#     return file_url
 
 def split_bullet_points(text):
     # 透過正規表示式將列點的部分分開
@@ -203,6 +219,9 @@ def generate_reply_messages(response, user_id):
     return messages
 
 
+
+
+
 #登入歡迎
 @handler.add(FollowEvent)
 def handle_follow(event):
@@ -232,8 +251,6 @@ def generate_summary(conversation):
 @handler.add(MessageEvent, message=TextMessage)
 
 def handle_text_message(event):
-    user_messages = {}
-    assistant_messages = {}
     msg = ""
     print("print")
     user_id = event.source.user_id
@@ -260,10 +277,8 @@ def handle_text_message(event):
 
     user_messages[user_id].append(text)
 
-    if user_id not in user_next_indices:
-        user_next_indices[user_id] = 0
-
-    
+    # if user_id not in user_next_indices:
+    #     user_next_indices[user_id] = 0
 
     try:
         if text == '是我願意相信emo':
@@ -328,20 +343,14 @@ def handle_text_message(event):
                 )
             )
 
-
-        elif text == '忘記':
-            memory.remove(user_id)
-            user_messages[user_id]=[]
-            assistant_messages[user_id]=[]
-            msg = TextSendMessage(text='歷史訊息清除成功')
-  
         elif text == '總結':
             memory.chats[user_id] = True
             conversation = user_messages[user_id] + assistant_messages[user_id]
-            if len(conversation) == 0:
-                msg = TextSendMessage(text='目前您沒有跟emo聊天，請先聊聊再來~')
-            else:
-                text=generate_summary(conversation)
+            text=generate_summary(conversation)
+
+        elif text == '忘記':
+            memory.remove(user_id)
+            msg = TextSendMessage(text='歷史訊息清除成功')
 
         elif text == '請畫':
             user_states[user_id] = 'drawing'
@@ -515,6 +524,55 @@ def handle_text_message(event):
         else:
             msg = TextSendMessage(text=str(e))
     line_bot_api.reply_message(event.reply_token, msg)
+
+#語音輸出測試
+# @handler.add(MessageEvent, message=AudioMessage)
+# def handle_audio_message(event):
+#     user_id = event.source.user_id
+#     audio_content = line_bot_api.get_message_content(event.message.id)
+#     input_audio_path = f'{str(uuid.uuid4())}.m4a'
+#     with open(input_audio_path, 'wb') as fd:
+#         for chunk in audio_content.iter_content():
+#             fd.write(chunk)
+
+#     try:
+#         if not model_management.get(user_id):
+#             raise ValueError('Invalid API token')
+#         else:
+#             is_successful, response, error_message = model_management[user_id].audio_transcriptions(input_audio_path, 'whisper-1')
+#             if not is_successful:
+#                 raise Exception(error_message)
+#             memory.append(user_id, 'user', response['text'])
+#             is_successful, response, error_message = model_management[user_id].chat_completions(memory.get(user_id), 'gpt-3.5-turbo')
+#             if not is_successful:
+#                 raise Exception(error_message)
+#             role, response_text = get_role_and_content(response)
+#             memory.append(user_id, role, response_text)
+            
+#             # 將回應文字轉換為語音
+#             output_audio_path = synthesize_text_to_speech(response_text)
+
+#             # 將語音檔案上傳到 Google Cloud Storage
+#             audio_url = upload_to_cloud_storage(output_audio_path, 'your_bucket_name')
+
+#             # 創建音訊訊息
+#             msg = AudioSendMessage(original_content_url=audio_url, duration=240000)
+#     except ValueError:
+#         msg = TextSendMessage(text='請先註冊你的 API Token，格式為 /註冊 [API TOKEN]')
+#     except KeyError:
+#         msg = TextSendMessage(text='請先註冊 Token，格式為 /註冊 sk-xxxxx')
+#     except Exception as e:
+#         memory.remove(user_id)
+#         if str(e).startswith('Incorrect API key provided'):
+#             msg = TextSendMessage(text='OpenAI API Token 有誤，請重新註冊。')
+#         else:
+#             msg = TextSendMessage(text=str(e))
+
+#     # 刪除本地音頻檔案
+#     os.remove(input_audio_path)
+#     os.remove(output_audio_path)
+
+#     line_bot_api.reply_message(event.reply_token, msg)
 
 #語音輸入
 @handler.add(MessageEvent, message=AudioMessage)
