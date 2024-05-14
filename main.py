@@ -41,4 +41,4 @@ def linebot():
         print(e)                # 發生錯誤就印出完整錯誤內容
     return 'OK'                 # 驗證 Webhook 使用，不能省略
 if __name__ == "__main__":
-    app.run()
+    app.run("0.0.0.0", port=8080)
