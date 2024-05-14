@@ -1,3 +1,4 @@
+gunicorn
 line-bot-sdk==2.4.1
 python-dotenv==0.21.1
 Flask==2.2.2
@@ -8,4 +9,3 @@ pymongo==4.3.3
 psycopg2-binary
 gTTS
 requests
-gunicorn
