@@ -14,7 +14,7 @@ app = Flask(__name__)
 access_token = os.getenv('LINE_CHANNEL_ACCESS_TOKEN')
 channel_secret = os.getenv('LINE_CHANNEL_SECRET')
 
-@app.route("/", methods=['POST'])
+@app.route("/callback", methods=['POST'])
 def linebot():
     body = request.get_data(as_text=True)                 # 取得收到的訊息內容
     try:
