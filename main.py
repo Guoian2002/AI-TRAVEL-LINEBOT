@@ -38,6 +38,7 @@ load_dotenv('.env')
 app = Flask(__name__)
 line_bot_api = LineBotApi(os.getenv('LINE_CHANNEL_ACCESS_TOKEN'))
 handler = WebhookHandler(os.getenv('LINE_CHANNEL_SECRET'))
+PORT=os.getenv("PORT")
 storage = None
 youtube = Youtube(step=4)
 website = Website()
@@ -629,4 +630,4 @@ if __name__ == "__main__":
             model_management[user_id] = OpenAIModel(api_key=data[user_id])
     except FileNotFoundError:
         pass
-    app.run(host='0.0.0.0', port=10000)
+    app.run(host='0.0.0.0', port=PORT)
