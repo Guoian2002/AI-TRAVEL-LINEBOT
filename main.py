@@ -1,5 +1,5 @@
 from flask import Flask, request
-
+import os
 import time
 
 # 載入 LINE Message API 相關函式庫
@@ -11,8 +11,8 @@ import json
 app = Flask(__name__)
 
 
-access_token = 'LINE_CHANNEL_ACCESS_TOKEN'
-channel_secret = 'LINE_CHANNEL_SECRET'
+access_token = os.getenv('LINE_CHANNEL_ACCESS_TOKEN')
+channel_secret = os.getenv('LINE_CHANNEL_SECRET')
 
 @app.route("/", methods=['POST'])
 def linebot():
