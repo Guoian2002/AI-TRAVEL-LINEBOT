@@ -678,9 +678,12 @@ def handle_text_message(event):
                 else:
                     is_successful, response, error_message = user_model.chat_completions(
                         memory.get(user_id), os.getenv('MODEL'))
+                    logger.info("1")
                     if not is_successful:
+                        logger.info("2")
                         raise Exception(error_message)
                     role, response = get_role_and_content(response)
+                    logger.info("3")
                     # if len(response) > MAX_CHARS:
                     #     messages = generate_reply_messages(response, user_id)
                     #     line_bot_api.reply_message(event.reply_token, messages)
