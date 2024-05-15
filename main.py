@@ -34,7 +34,7 @@ import math, json, time, requests
 # 載入 LINE Message API 相關函式庫
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage, StickerSendMessage, ImageSendMessage, LocationSendMessage
+from linebot.models import MessageEvent, TextMessage, TextSendMessage, StickerSendMessage, ImageSendMessage, LocationSendMessage, LocationMessage
 
 # from google.cloud import storage
 # from google.oauth2 import service_account
@@ -172,8 +172,8 @@ def cctv(msg):
 access_token = os.getenv('LINE_CHANNEL_ACCESS_TOKEN')
 channel_secret = os.getenv('LINE_CHANNEL_SECRET')
 load_dotenv('.env')
-line_bot_api = LineBotApi(os.getenv('LINE_CHANNEL_ACCESS_TOKEN'))
-handler = WebhookHandler(os.getenv('LINE_CHANNEL_SECRET'))
+line_bot_api = LineBotApi(access_token)
+handler = WebhookHandler(channel_secret)
 storage = None
 youtube = Youtube(step=4)
 website = Website()
@@ -588,10 +588,6 @@ def handle_text_message(event):
 
         elif text == "地震":
             msg = weather(event)
-        
-        elif type == "location":
-            logger.info("有進location的if")
-            msg = weather(event)
 
 
         
@@ -704,6 +700,11 @@ def handle_text_message(event):
             msg = TextSendMessage(text=str(e))
     line_bot_api.reply_message(event.reply_token, msg)
 
+#位置訊息輸入
+@handler.add(MessageEvent, message=LocationMessage)
+def handle_location_message(event):
+    msg = weather(event)
+    line_bot_api.reply_message(event.reply_token, msg)
 
 #語音輸入
 @handler.add(MessageEvent, message=AudioMessage)
