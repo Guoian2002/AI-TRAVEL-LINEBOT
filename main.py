@@ -692,7 +692,8 @@ def handle_text_message(event):
 
     except ValueError:
         msg = TextSendMessage(text='Token 無效，請重新註冊，格式為 /註冊 sk-xxxxx')
-    except KeyError:
+    except KeyError as e:
+        logger.info(e)
         msg = TextSendMessage(text='錯誤')
     except Exception as e:
         memory.remove(user_id)
