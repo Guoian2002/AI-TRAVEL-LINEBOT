@@ -590,6 +590,7 @@ def handle_text_message(event):
             msg = weather(event)
 
         elif text == "我需要推薦網站":
+            logger.info("進網站判斷")
             pass
 
 
@@ -702,7 +703,8 @@ def handle_text_message(event):
             msg = TextSendMessage(text='已超過負荷，請稍後再試')
         else:
             msg = TextSendMessage(text=str(e))
-    line_bot_api.reply_message(event.reply_token, msg)
+    if msg != "":
+        line_bot_api.reply_message(event.reply_token, msg)
 
 
 #位置訊息輸入
