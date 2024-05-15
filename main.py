@@ -588,6 +588,8 @@ def handle_text_message(event):
 
         elif text == "地震":
             msg = weather(event)
+
+        elif text == "我需要推薦網站":
             pass
 
 
