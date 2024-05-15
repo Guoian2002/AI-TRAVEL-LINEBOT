@@ -340,12 +340,11 @@ def generate_reply_messages(response, user_id):
 # 天氣
 def weather(json_data):
     try:
-        reply_token = json_data['events'][0]['replyToken']    # 取得回傳訊息的 Token ( reply message 使用 )
-        user_id = json_data['events'][0]['source']['userId']  # 取得使用者 ID ( push message 使用 )
+        user_id = json_data.source.userId  # 取得使用者 ID ( push message 使用 )
         print(json_data)                                      # 印出內容
-        type = json_data['events'][0]['message']['type']
+        type = json_data.type
         if type == 'text':
-            text = json_data['events'][0]['message']['text']
+            text = json_data.message.text
             if text == '雷達回波圖' or text == '雷達回波':
                 line_bot_api.push_message(user_id, TextSendMessage(text='馬上找給你！抓取資料中....'))
                 img_url = f'https://cwaopendata.s3.ap-northeast-1.amazonaws.com/Observation/O-A0058-001.png?{time.time_ns()}'
@@ -370,7 +369,7 @@ def weather(json_data):
                     return text_message
         elif type == 'location':
             line_bot_api.push_message(user_id, TextSendMessage(text='馬上找給你！抓取資料中....'))
-            address = json_data['events'][0]['message']['address'].replace('台','臺')  # 取出地址資訊，並將「台」換成「臺」
+            address = json_data.message.address.replace('台','臺')  # 取出地址資訊，並將「台」換成「臺」
             reply = getWeather(address)
             text_message = TextSendMessage(text=reply)
             return text_message
