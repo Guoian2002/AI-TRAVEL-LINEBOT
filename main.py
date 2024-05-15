@@ -590,6 +590,7 @@ def handle_text_message(event):
             pass
 
         elif text == "雷達回波":
+            print("雷達回波")
             pass
 
         elif text == "地震":
