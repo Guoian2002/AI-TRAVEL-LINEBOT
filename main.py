@@ -583,6 +583,7 @@ def handle_text_message(event):
             pass
 
         elif text == "雷達回波":
+            logger.info("有進雷達回波")
             msg = weather(event)
             pass
 
