@@ -418,7 +418,7 @@ def handle_text_message(event):
     text = event.message.text.strip()
     type = event.message.type.strip()
     logger.info(f'{user_id}: {text}')
-    api_key = os.getenv("CHATGPT_API_KEY")
+    api_key = os.getenv("TAIDE_API_KEY")
     model = OpenAIModel(api_key=api_key)
     is_successful, _, _ = model.check_token_valid()
     if not is_successful:
@@ -656,7 +656,7 @@ def handle_text_message(event):
                         if not is_successful:
                             raise Exception(error_message)
                         youtube_transcript_reader = YoutubeTranscriptReader(
-                            user_model, os.getenv('OPENAI_MODEL_ENGINE'))
+                            user_model, os.getenv('MODEL'))
                         is_successful, response, error_message = youtube_transcript_reader.summarize(
                             chunks)
                         if not is_successful:
@@ -668,7 +668,7 @@ def handle_text_message(event):
                         if len(chunks) == 0:
                             raise Exception('無法撈取此網站文字')
                         website_reader = WebsiteReader(
-                            user_model, os.getenv('OPENAI_MODEL_ENGINE'))
+                            user_model, os.getenv('MODEL'))
                         is_successful, response, error_message = website_reader.summarize(
                             chunks)
                         if not is_successful:
@@ -677,7 +677,7 @@ def handle_text_message(event):
                         msg = TextSendMessage(text=response)
                 else:
                     is_successful, response, error_message = user_model.chat_completions(
-                        memory.get(user_id), os.getenv('OPENAI_MODEL_ENGINE'))
+                        memory.get(user_id), os.getenv('MODEL'))
                     if not is_successful:
                         raise Exception(error_message)
                     role, response = get_role_and_content(response)
