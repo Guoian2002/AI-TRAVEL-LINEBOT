@@ -588,7 +588,9 @@ def handle_text_message(event):
 
         elif text == "地震":
             msg = weather(event)
+        
         elif type == "location":
+            logger.info("有進location的if")
             msg = weather(event)
 
 
