@@ -585,12 +585,20 @@ def handle_text_message(event):
                 )              
             )
 
+        # 不用傳進gpt的文字
         elif text == "~壓力~":
             pass
 
         elif text == "~趣味~":
             pass
 
+        elif text == "雷達回波":
+            pass
+
+        elif text == "地震":
+            pass
+
+        
 
         else:
             if text == '開啟聊天':
