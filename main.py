@@ -341,10 +341,10 @@ def generate_reply_messages(response, user_id):
 def weather(event):
     try:
         user_id = event.source.user_id  # 取得使用者 ID ( push message 使用 )
-        logger.info(event)                                      # 印出內容
-        type = event.type
+        logger.info("user_id: " + user_id)                                      # 印出內容
+        type = event.message.type.strip()
         if type == 'text':
-            text = event.message.text
+            text = event.message.text.strip()
             if text == '雷達回波圖' or text == '雷達回波':
                 line_bot_api.push_message(user_id, TextSendMessage(text='馬上找給你！抓取資料中....'))
                 img_url = f'https://cwaopendata.s3.ap-northeast-1.amazonaws.com/Observation/O-A0058-001.png?{time.time_ns()}'
