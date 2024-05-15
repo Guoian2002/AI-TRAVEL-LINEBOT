@@ -340,7 +340,7 @@ def generate_reply_messages(response, user_id):
 # 天氣
 def weather(event):
     try:
-        user_id = event.source.userId  # 取得使用者 ID ( push message 使用 )
+        user_id = event.source.user_id  # 取得使用者 ID ( push message 使用 )
         logger.info(event)                                      # 印出內容
         type = event.type
         if type == 'text':
