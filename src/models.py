@@ -19,7 +19,7 @@ class ModelInterface:
 class OpenAIModel(ModelInterface):
     def __init__(self, api_key: str):
         self.api_key = api_key
-        self.base_url = 'http://120.126.23.245:32264/ollama/api/chat'
+        self.base_url = 'http://120.126.23.245:32264/ollama/api'
 
     def _request(self, method, endpoint, body=None, files=None):
         self.headers = {
@@ -47,7 +47,7 @@ class OpenAIModel(ModelInterface):
             'model': model_engine,
             'messages': messages
         }
-        return self._request('POST', '/chat/completions', body=json_body)
+        return self._request('POST', '/chat', body=json_body)
 
     def audio_transcriptions(self, file_path, model_engine) -> str:
         files = {
