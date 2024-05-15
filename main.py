@@ -416,6 +416,7 @@ def handle_text_message(event):
         print("沒有chat")
         memory.setChat(user_id, True)
     text = event.message.text.strip()
+    type = event.message.type.strip()
     logger.info(f'{user_id}: {text}')
     api_key = os.getenv("CHATGPT_API_KEY")
     model = OpenAIModel(api_key=api_key)
@@ -584,11 +585,12 @@ def handle_text_message(event):
 
         elif text == "雷達回波":
             msg = weather(event)
-            pass
 
         elif text == "地震":
             msg = weather(event)
-            pass
+        elif type == "location":
+            msg = weather(event)
+
 
         
 
