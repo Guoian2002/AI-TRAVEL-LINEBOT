@@ -341,8 +341,6 @@ def generate_reply_messages(response, user_id):
 def linebot():
     body = request.get_data(as_text=True)                    # 取得收到的訊息內容
     try:
-        line_bot_api = LineBotApi(access_token)     # 確認 token 是否正確
-        handler = WebhookHandler(channel_secret)    # 確認 secret 是否正確
         signature = request.headers['X-Line-Signature']             # 加入回傳的 headers
         handler.handle(body, signature)      # 綁定訊息回傳的相關資訊
         json_data = json.loads(body)         # 轉換內容為 json 格式
@@ -590,7 +588,6 @@ def handle_text_message(event):
             pass
 
         elif text == "雷達回波":
-            print("雷達回波進來")
             pass
 
         elif text == "地震":
