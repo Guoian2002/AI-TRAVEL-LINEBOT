@@ -700,6 +700,7 @@ def handle_text_message(event):
             msg = TextSendMessage(text=str(e))
     line_bot_api.reply_message(event.reply_token, msg)
 
+
 #位置訊息輸入
 @handler.add(MessageEvent, message=LocationMessage)
 def handle_location_message(event):
