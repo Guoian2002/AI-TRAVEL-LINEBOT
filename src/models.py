@@ -48,7 +48,7 @@ class OpenAIModel(ModelInterface):
             "stream": False,
             'messages': messages,
             "options":{
-                "num_predict":64
+                "num_predict":300
             }
         }
         return self._request('POST', '/chat', body=json_body)
