@@ -183,7 +183,7 @@ memory = Memory(system_message=os.getenv(
 model_management = {}
 api_keys = {}
 # chat = True
-# place_array = ["士林區", "大同區", "信義區", "北投區", "文山區", "大安區", "中正區", "內湖區", "松山區", "中山區"]
+place_array = ["士林區", "大同區", "信義區", "北投區", "文山區", "大安區", "中正區", "內湖區", "松山區", "中山區"]
 user_states = {}
 MAX_CHARS = 150
 user_next_indices = {} 
