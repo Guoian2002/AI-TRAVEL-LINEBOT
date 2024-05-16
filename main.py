@@ -183,7 +183,7 @@ memory = Memory(system_message=os.getenv(
 model_management = {}
 api_keys = {}
 # chat = True
-place_array = ["士林區", "大同區", "信義區", "北投區", "文山區", "大安區", "中正區", "內湖區", "松山區", "中山區"]
+# place_array = ["士林區", "大同區", "信義區", "北投區", "文山區", "大安區", "中正區", "內湖區", "松山區", "中山區"]
 user_states = {}
 MAX_CHARS = 150
 user_next_indices = {} 
@@ -397,11 +397,11 @@ def handle_follow(event):
                             ))
         ]
     )
-
+ """
 def generate_summary(conversation):
     
     return "請幫我將以下對話做100字左右的總結"+" ".join(conversation[:10])
- """
+
 #文字輸出
 @handler.add(MessageEvent, message=TextMessage)
 
@@ -441,70 +441,7 @@ def handle_text_message(event):
     
 
     try:
-        if text == '是我願意相信emo':
-            user_states[user_id] = 'awaiting_relation'
-            msg = TextSendMessage(text="請輸入您信任的親朋好友關係")
-        elif user_id in user_states and user_states[user_id] == 'awaiting_relation':
-            user_relations[user_id] = text  # store the relation
-            user_states[user_id] = 'awaiting_phone'  # change state to awaiting_phone
-            msg = TextSendMessage(text="請輸入親朋好友的電話號碼")
-        elif user_id in user_states and user_states[user_id] == 'awaiting_phone':
-            insert_into_db(user_id, user_relations[user_id], text)  # insert both relation and phone into DB
-            user_states[user_id] = None  # reset state
-            user_relations[user_id] = None  # clear stored relation
-            msg = TextSendMessage(text="您的親朋好友關係及電話已經成功記錄。現在可以跟emo聊天了。")
-
-
-        elif text == '我需要求助':
-            trusted_person = get_trusted_person(user_id)
-            if trusted_person is not None:
-                relation, phone_number = trusted_person
-                msg = TextSendMessage(text=f"或是你可以尋找你信任的 {relation}，電話號碼是 {phone_number}，他會給與妳很大的協助。")
-                line_bot_api.reply_message(event.reply_token, msg)
-
-        elif text == '相信emo':
-            msg=TextSendMessage(text="您是否願意留下最信任的親朋好友聯絡方式給emo，讓emo在您需要幫助的時候可以盡快的給予您幫助～",
-                            quick_reply=QuickReply(
-                                items=[
-                                    QuickReplyButton(
-                                        action=MessageAction(label="是我願意相信emo", text="是我願意相信emo")
-                                    ),
-                                    QuickReplyButton(
-                                        action=MessageAction(label="我再想想", text="我再想想")
-                                    )
-                                ]
-                            ))
-
-
-        elif text=="我再想想":
-            msg = TextSendMessage(text="現在可以跟emo聊天了~")
-
-        elif text == 'emo你在嗎':
-            msg = TextSendMessage(
-                text="我在，有甚麼可以幫您的嗎，以下是您可以使用的指令\n\n指令：\n\n忘記\n👉 Emo會忘記上下文關係，接下來的回答不再跟上文有關係~\n\n請畫\n👉 請畫+你想畫的東西 Emo會在短時間畫給你~\n\n語音輸入\n👉 使用line語音輸入Emo可以直接回覆喔~\n\n其他文字輸入\n👉 Emo直接以文字回覆~  \n\n相信emo\n👉 Emo會更新你提供的資訊~",
-                quick_reply=QuickReply(
-                    items=[
-                        QuickReplyButton(
-                            action=MessageAction(label="忘記", text="忘記")
-                        ),
-                        QuickReplyButton(
-                            action=MessageAction(label="請畫", text="請畫")
-                        ),
-                        QuickReplyButton(
-                            action=MessageAction(label="總結", text="總結")
-                        ),
-                        QuickReplyButton(
-                            action=MessageAction(label="語音輸入", text="語音輸入")
-                        ),
-                        QuickReplyButton(
-                            action=MessageAction(label="相信emo", text="相信emo")
-                        ),
-                    ]
-                )
-            )
-
-
-        elif text == '忘記':
+        if text == '忘記':
             memory.remove(user_id)
             user_messages[user_id]=[]
             assistant_messages[user_id]=[]
@@ -517,26 +454,6 @@ def handle_text_message(event):
                 msg = TextSendMessage(text='目前您沒有跟emo聊天，請先聊聊再來~')
             else:
                 text=generate_summary(conversation)
-
-        elif text == '請畫':
-            user_states[user_id] = 'drawing'
-            msg = TextSendMessage(text='請輸入你想畫的東西')
-
-        elif user_states.get(user_id) == 'drawing':
-            prompt = text.strip()
-            memory.append(user_id, 'user', prompt)
-            is_successful, response, error_message = model_management[user_id].image_generations(
-                prompt)
-            if not is_successful:
-                raise Exception(error_message)
-            url = response['data'][0]['url']
-            msg = ImageSendMessage(
-                original_content_url=url,
-                preview_image_url=url
-            )
-            memory.append(user_id, 'assistant', url)
-
-            user_states[user_id] = None
 
         elif text == "語音輸入":
             msg = TextSendMessage(
@@ -562,20 +479,6 @@ def handle_text_message(event):
             tmp=get_data_from_db( text )
             msg = TextSendMessage(text=tmp)
         
-        elif text == "我想要做心理測驗":
-            msg = TextSendMessage(text="請選擇想做的類型",
-                quick_reply=QuickReply(
-                    items=[
-                        QuickReplyButton(
-                            action=MessageAction(label="~壓力~", text="~壓力~")
-                        ),
-                        QuickReplyButton(
-                            action=MessageAction(label="~趣味~", text="~趣味~")
-                        ),
-                    ]
-                )              
-            )
-
         elif text == "雷達回波":
             msg = weather(event)
 
@@ -610,46 +513,6 @@ def handle_text_message(event):
             elif text == '關閉聊天':
                 memory.chats[user_id] = False
                 msg = TextSendMessage(text="已關閉聊天")
-
-            elif text == '我想要查詢心理醫療機構':
-                msg = TextSendMessage(
-                    text="請點選想查詢的地區",
-                    quick_reply=QuickReply(
-                        items=[
-                            QuickReplyButton(
-                                action=MessageAction(label="士林區", text="士林區")
-                            ),
-                            QuickReplyButton(
-                                action=MessageAction(label="大同區", text="大同區")
-                            ),
-                            QuickReplyButton(
-                                action=MessageAction(label="信義區", text="信義區")
-                            ),
-                            QuickReplyButton(
-                                action=MessageAction(label="北投區", text="北投區")
-                            ),
-                            QuickReplyButton(
-                                action=MessageAction(label="文山區", text="文山區")
-                            ),
-                            QuickReplyButton(
-                                action=MessageAction(label="大安區", text="大安區")
-                            ),
-                            QuickReplyButton(
-                                action=MessageAction(label="中正區", text="中正區")
-                            ),
-                            QuickReplyButton(
-                                action=MessageAction(label="內湖區", text="內湖區")
-                            ),
-                            QuickReplyButton(
-                                action=MessageAction(label="松山區", text="松山區")
-                            ),
-                            QuickReplyButton(
-                                action=MessageAction(label="中山區", text="中山區")
-                            )
-
-                        ]
-                    )
-                )
 
             else:
                 user_model = model_management[user_id]
