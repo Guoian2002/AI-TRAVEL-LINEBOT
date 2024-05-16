@@ -576,13 +576,6 @@ def handle_text_message(event):
                 )              
             )
 
-        # 不用傳進gpt的文字
-        elif text == "~壓力~":
-            pass
-
-        elif text == "~趣味~":
-            pass
-
         elif text == "雷達回波":
             msg = weather(event)
 
@@ -593,7 +586,20 @@ def handle_text_message(event):
             pass
 
 
-
+            
+        elif text == "天氣資訊":
+            msg = TextSendMessage(text="請選擇想知道的資訊，如需詳細資訊請使用line內建傳送位置資訊",
+                quick_reply=QuickReply(
+                    items=[
+                        QuickReplyButton(
+                            action=MessageAction(label="雷達回波", text="雷達回波")
+                        ),
+                        QuickReplyButton(
+                            action=MessageAction(label="地震", text="地震")
+                        ),
+                    ]
+                )              
+            )
         
 
         else:
