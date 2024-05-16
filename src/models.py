@@ -46,7 +46,10 @@ class OpenAIModel(ModelInterface):
         json_body = {
             'model': model_engine,
             "stream": False,
-            'messages': messages
+            'messages': messages,
+            "options":{
+                "num_predict":64
+            }
         }
         return self._request('POST', '/chat', body=json_body)
 
