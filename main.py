@@ -30,21 +30,13 @@ from flask import Flask, request
 import os
 import math, json, time, requests
 
-
-# 載入 LINE Message API 相關函式庫
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage, StickerSendMessage, ImageSendMessage, LocationSendMessage, LocationMessage
 
-# from google.cloud import storage
-# from google.oauth2 import service_account
-# import json
-# credentials_dict = json.loads(os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
-# credentials = service_account.Credentials.from_service_account_info(credentials_dict)
-# storage_client = storage.Client(credentials=credentials)
-
 app = Flask(__name__)
 
+#地震
 def earth_quake():
     result = []
     code = os.getenv('WEATHER_TOKEN')
@@ -183,8 +175,6 @@ memory = Memory(system_message=os.getenv(
 model_management = {}
 api_keys = {}
 # chat = True
-place_array = ["士林區", "大同區", "信義區", "北投區", "文山區", "大安區", "中正區", "內湖區", "松山區", "中山區"]
-user_states = {}
 MAX_CHARS = 150
 user_next_indices = {} 
 
@@ -202,49 +192,47 @@ def callback():
     return 'OK'
 
 DATABASE_URL = os.environ['DATABASE_URL']
-def get_data_from_db( dis ):
-    try:
-        # 使用 urlparse 解析連接 URI
-        params = urlparse(unquote(DATABASE_URL))
+import psycopg2
+from urllib.parse import urlparse, unquote
 
-        # 建立連接
-        conn = psycopg2.connect(
-            dbname=params.path[1:],
-            user=params.username,
-            password=params.password,
-            host=params.hostname,
-            port=params.port
-        )
+def add_to_my_love(user_id, new_love):
+    params = urlparse(unquote(DATABASE_URL))
 
-        # 執行 SQL 查詢並獲取資料
-        cur = conn.cursor()
-        cur.execute("   SELECT name,address,phone FROM heart WHERE district = '"+ dis +"';")
-        rows = cur.fetchall()
+    conn = psycopg2.connect(
+        dbname=params.path[1:],
+        user=params.username,
+        password=params.password,
+        host=params.hostname,
+        port=params.port
+    )
 
-        # 檢查查詢結果是否為空
-        if rows:
-            message = str(rows) 
-            result = message.replace("[", "").replace("]", "").replace("(", "🧡").replace(")", " \n").replace(",", " \n").replace("'", "")
-            
-            if len(message) <= 2000:  # 檢查消息長度
-                return result
-            else:
-                return 'The message is too long!'
-        else:
-            return 'The query result is empty!'
+    # 建立連接
+    cur = conn.cursor()
 
-        cur.close()
-        conn.close()
-    except Exception as e:
-        return 'An error occurred except'
+    # 檢查 user_id 是否已存在
+    cur.execute("SELECT my_love FROM Love_place WHERE user_id = %s", (user_id,))
+    result = cur.fetchone()
 
-    return rows
+    if result is None:
+        # user_id 不存在，插入新記錄
+        cur.execute("INSERT INTO Love_place (user_id, my_love) VALUES (%s, %s)", (user_id, new_love))
+    else:
+        # user_id 已存在，更新 my_love 欄位
+        existing_my_love = result[0]
+        updated_my_love = existing_my_love + ',' + new_love if existing_my_love else new_love
+
+        cur.execute("UPDATE Love_place SET my_love = %s WHERE user_id = %s", 
+                    (updated_my_love, user_id))
+
+    # 提交事務
+    conn.commit()
+
+    # 關閉連接
+    cur.close()
+    conn.close()
 
 
-user_states = {}
-user_relations = {}
-#將使用者資料寫入到friend資料庫
-def insert_into_db(user_id, relation, phone_number):
+def add_to_want(user_id, new_want):
     params = urlparse(unquote(DATABASE_URL))
     conn = psycopg2.connect(
         dbname=params.path[1:],
@@ -256,18 +244,21 @@ def insert_into_db(user_id, relation, phone_number):
 
     # 建立連接
     cur = conn.cursor()
- 
-    # 檢查 user_id 是否已存在
-    cur.execute("SELECT COUNT(*) FROM friend WHERE user_id = %s", (user_id,))
-    count = cur.fetchone()[0]
 
-    if count == 0:
+    # 檢查 user_id 是否已存在
+    cur.execute("SELECT want FROM Love_place WHERE user_id = %s", (user_id,))
+    result = cur.fetchone()
+
+    if result is None:
         # user_id 不存在，插入新記錄
-        cur.execute("INSERT INTO friend (user_id, relation, phone_number) VALUES (%s, %s, %s)", (user_id, relation, phone_number))
+        cur.execute("INSERT INTO Love_place (user_id, want) VALUES (%s, %s)", (user_id, new_want))
     else:
-        # user_id 已存在，刪除該使用者的所有欄位資料再插入新記錄
-        cur.execute("DELETE FROM friend WHERE user_id = %s", (user_id,))
-        cur.execute("INSERT INTO friend (user_id, relation, phone_number) VALUES (%s, %s, %s)", (user_id, relation, phone_number))
+        # user_id 已存在，更新 want 欄位
+        existing_want = result[0]
+        updated_want = existing_want + ',' + new_want if existing_want else new_want
+
+        cur.execute("UPDATE Love_place SET want = %s WHERE user_id = %s", 
+                    (updated_want, user_id))
 
     # 提交事務
     conn.commit()
@@ -276,7 +267,7 @@ def insert_into_db(user_id, relation, phone_number):
     cur.close()
     conn.close()
 
-def get_trusted_person(user_id):
+def add_to_been_to(user_id, new_been_to):
     params = urlparse(unquote(DATABASE_URL))
     conn = psycopg2.connect(
         dbname=params.path[1:],
@@ -285,57 +276,31 @@ def get_trusted_person(user_id):
         host=params.hostname,
         port=params.port
     )
+
+    # 建立連接
     cur = conn.cursor()
-    cur.execute("SELECT relation, phone_number FROM friend WHERE user_id = %s", (user_id,))
+
+    # 檢查 user_id 是否已存在
+    cur.execute("SELECT been_to FROM Love_place WHERE user_id = %s", (user_id,))
     result = cur.fetchone()
 
+    if result is None:
+        # user_id 不存在，插入新記錄
+        cur.execute("INSERT INTO Love_place (user_id, been_to) VALUES (%s, %s)", (user_id, new_been_to))
+    else:
+        # user_id 已存在，更新 been_to 欄位
+        existing_been_to = result[0]
+        updated_been_to = existing_been_to + ',' + new_been_to if existing_been_to else new_been_to
+
+        cur.execute("UPDATE Love_place SET been_to = %s WHERE user_id = %s", 
+                    (updated_been_to, user_id))
+
+    # 提交事務
+    conn.commit()
+
+    # 關閉連接
     cur.close()
     conn.close()
-
-    return result
-
-def split_bullet_points(text):
-    # 透過正規表示式將列點的部分分開
-    title = re.match(r'[\u4e00-\u9fff]+[。]', text)
-    try:
-        title = title.group(0)
-    except:
-        title = "前面取不到"
-    points = re.findall(r'\S*\d+\. \S*', text)
-    # 去除第一個元素，因為在第一個列點之前的部分會是空字串
-    return title, points[1:]
-
-# # 控制輸出的字數
-# def generate_reply_messages(response, user_id):
-#     messages = []
-
-#     # 檢查文字是否為列點式的格式
-#     title, parts = split_bullet_points(response)
-#     if(len(parts) != 0):
-#         messages.append(TextSendMessage(text=title, quick_reply=QuickReply(
-#                 items=[QuickReplyButton(action=MessageAction(label="繼續", text="繼續"))])))
-#         for part in parts:
-#             messages.append(TextSendMessage(text=part, quick_reply=QuickReply(
-#                 items=[QuickReplyButton(action=MessageAction(label="繼續", text="繼續"))])))
-#     else:
-#         messages.append(TextSendMessage(text=response, quick_reply=QuickReply(
-#                 items=[QuickReplyButton(action=MessageAction(label="繼續", text="繼續"))])))
-    # else:
-    #     response_len = len(response)
-    #     remaining_response = response
-
-    #     while response_len > MAX_CHARS:
-    #         split_index = remaining_response.rfind(' ', 0, MAX_CHARS)
-    #         current_message = remaining_response[:split_index]
-    #         remaining_response = remaining_response[split_index + 1:]
-    #         response_len = len(remaining_response)
-    #         messages.append(TextSendMessage(text=current_message, quick_reply=QuickReply(
-    #             items=[QuickReplyButton(action=MessageAction(label="繼續", text="繼續"))])))
-
-    #     messages.append(TextSendMessage(text=remaining_response))
-
-    user_next_indices[user_id] = len(user_messages[user_id])
-    return messages
 
 # 天氣
 def weather(event):
@@ -451,7 +416,7 @@ def handle_text_message(event):
             memory.chats[user_id] = True
             conversation = user_messages[user_id] + assistant_messages[user_id]
             if len(conversation) == 0:
-                msg = TextSendMessage(text='目前您沒有跟emo聊天，請先聊聊再來~')
+                msg = TextSendMessage(text='目前您沒有跟小T，請先聊聊再來~')
             else:
                 text=generate_summary(conversation)
 
@@ -474,10 +439,6 @@ def handle_text_message(event):
 
         elif text == "語音":
             msg = TextSendMessage(text="近期即將推出，敬請期待")
-        
-        elif text in place_array:
-            tmp=get_data_from_db( text )
-            msg = TextSendMessage(text=tmp)
         
         elif text == "雷達回波":
             msg = weather(event)
@@ -504,6 +465,46 @@ def handle_text_message(event):
                 )              
             )
         
+        elif text == "聊天功能":
+            msg = TextSendMessage(
+                text="請選擇想要的模式",
+                quick_reply=QuickReply(
+                    items=[
+                        QuickReplyButton(
+                            action=MessageAction(label="開啟聊天", text="開啟聊天")
+                        ),
+                        QuickReplyButton(
+                            action=MessageAction(label="關閉聊天", text="關閉聊天")
+                        ),
+                        QuickReplyButton(
+                            action=MessageAction(label="忘記", text="忘記")
+                        ),
+                        QuickReplyButton(
+                            action=MessageAction(label="總結", text="總結")
+                        ),
+                    ]
+                )
+            )
+
+        elif text == "我的最愛":
+            msg = TextSendMessage(
+                text="選擇想記錄的地方",
+                quick_reply=QuickReply(
+                    items=[
+                        QuickReplyButton(
+                            action=MessageAction(label="最愛的地方", text="最愛的地方")
+                        ),
+                        QuickReplyButton(
+                            action=MessageAction(label="想去的地方", text="想去的地方")
+                        ),
+                        QuickReplyButton(
+                            action=MessageAction(label="已去過的地方", text="已去過的地方")
+                        ),
+                     
+                    ]
+                )
+            )
+
 
         else:
             if text == '開啟聊天':
@@ -564,7 +565,7 @@ def handle_text_message(event):
         msg = TextSendMessage(text='Token 無效，請重新註冊，格式為 /註冊 sk-xxxxx')
     except KeyError as e:
         logger.info(e)
-        msg = TextSendMessage(text='錯誤')
+        msg = TextSendMessage(text='TAIDE 休息中~')
     except Exception as e:
         memory.remove(user_id)
         if str(e).startswith('Incorrect API key provided'):
