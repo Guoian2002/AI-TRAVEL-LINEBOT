@@ -342,27 +342,6 @@ def weather(event):
         print(e)
     return 'OK'                 # 驗證 Webhook 使用，不能省略
 
-""" #登入歡迎
-@handler.add(FollowEvent)
-def handle_follow(event):
-    line_bot_api.reply_message(
-        event.reply_token,
-        [
-            TextSendMessage(text="您好！🎊\n我是你的心情小助手 Emo ~\n在這裡，您可以放心的跟我聊天\n我可以提供您免費的AI心理諮商服務🥰\n點開底下選單\n我可以提供心理院所的資料給您參考\n有需要時，我可以給您專業人員的電話撥打☎️\n我也將不定時的給您更多有趣的心理測驗玩玩🖋\n接下來您可以自由的跟我聊聊囉😀"),
-            TextSendMessage(text="您是否願意留下最信任的親朋好友聯絡方式給emo，讓emo在您需要幫助的時候可以盡快的給予您幫助～",
-                            quick_reply=QuickReply(
-                                items=[
-                                    QuickReplyButton(
-                                        action=MessageAction(label="是我願意相信emo", text="是我願意相信emo")
-                                    ),
-                                    QuickReplyButton(
-                                        action=MessageAction(label="我再想想", text="我再想想")
-                                    )
-                                ]
-                            ))
-        ]
-    )
- """
 def generate_summary(conversation):
     
     return "請幫我將以下對話做100字左右的總結"+" ".join(conversation[:10])
@@ -504,6 +483,18 @@ def handle_text_message(event):
                     ]
                 )
             )
+
+        elif text == '最愛的地方':
+            add_to_my_love(user_id, text)
+            msg = TextSendMessage(text="現在可以隨意輸入")
+
+        elif text == '想去的地方':
+            add_to_want(user_id, text)
+            msg = TextSendMessage(text="現在可以隨意輸入")
+
+        elif text == '已去過的地方':
+            add_to_been_to(user_id, text)
+            msg = TextSendMessage(text="現在可以隨意輸入")
 
 
         else:
