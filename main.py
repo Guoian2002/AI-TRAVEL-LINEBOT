@@ -323,8 +323,8 @@ def view_records():
 
     result_text = ""
     for record in records:
-        user_id, my_love, want, been_to = record
-        result_text += f"user_id: {user_id}\nmy_love: {my_love}\n"
+        user_id, my_love = record
+        result_text += f"user_id: {user_id}\n my_love: {my_love}\n"
 
     conn.commit()
     cur.close()
