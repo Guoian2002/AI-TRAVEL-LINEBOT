@@ -248,18 +248,18 @@ def add_to_want(user_id, new_want):
     cur = conn.cursor()
 
     # 檢查 user_id 是否已存在
-    cur.execute("SELECT want FROM Love_place WHERE user_id = %s", (user_id,))
+    cur.execute("SELECT want FROM my_want WHERE user_id = %s", (user_id,))
     result = cur.fetchone()
 
     if result is None:
         # user_id 不存在，插入新記錄
-        cur.execute("INSERT INTO Love_place (user_id, want) VALUES (%s, %s)", (user_id, new_want))
+        cur.execute("INSERT INTO my_want (user_id, want) VALUES (%s, %s)", (user_id, new_want))
     else:
         # user_id 已存在，更新 want 欄位
         existing_want = result[0]
         updated_want = existing_want + ',' + new_want if existing_want else new_want
 
-        cur.execute("UPDATE Love_place SET want = %s WHERE user_id = %s", 
+        cur.execute("UPDATE my_want SET want = %s WHERE user_id = %s", 
                     (updated_want, user_id))
 
     # 提交事務
@@ -283,18 +283,18 @@ def add_to_been_to(user_id, new_been_to):
     cur = conn.cursor()
 
     # 檢查 user_id 是否已存在
-    cur.execute("SELECT been_to FROM Love_place WHERE user_id = %s", (user_id,))
+    cur.execute("SELECT been_to FROM been_to WHERE user_id = %s", (user_id,))
     result = cur.fetchone()
 
     if result is None:
         # user_id 不存在，插入新記錄
-        cur.execute("INSERT INTO Love_place (user_id, been_to) VALUES (%s, %s)", (user_id, new_been_to))
+        cur.execute("INSERT INTO been_to (user_id, been_to) VALUES (%s, %s)", (user_id, new_been_to))
     else:
         # user_id 已存在，更新 been_to 欄位
         existing_been_to = result[0]
         updated_been_to = existing_been_to + ',' + new_been_to if existing_been_to else new_been_to
 
-        cur.execute("UPDATE Love_place SET been_to = %s WHERE user_id = %s", 
+        cur.execute("UPDATE been_to SET been_to = %s WHERE user_id = %s", 
                     (updated_been_to, user_id))
 
     # 提交事務
