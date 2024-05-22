@@ -304,6 +304,33 @@ def add_to_been_to(user_id, new_been_to):
     cur.close()
     conn.close()
 
+def view_records():
+    params = urlparse(unquote(DATABASE_URL))
+    conn = psycopg2.connect(
+        dbname=params.path[1:],
+        user=params.username,
+        password=params.password,
+        host=params.hostname,
+        port=params.port
+    )
+
+    cur = conn.cursor()
+
+    cur.execute("SELECT user_id, my_love FROM Love_place")
+    cur.execute("SELECT user_id, want FROM my_want")
+    cur.execute("SELECT user_id, been_to FROM been_to")
+    records = cur.fetchall()
+
+    result_text = ""
+    for record in records:
+        user_id, my_love, want, been_to = record
+        result_text += f"user_id: {user_id}\nmy_love: {my_love}\nwant: {want}\nbeen_to: {been_to}\n\n"
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    return result_text.strip()
 # 天氣
 def weather(event):
     try:
@@ -530,7 +557,10 @@ def handle_text_message(event):
             # 回傳訊息
             line_bot_api.reply_message(event.reply_token, msg)
 
-
+        elif text == '查看紀錄':
+            records = view_records()
+            msg = TextSendMessage(text=records)
+            line_bot_api.reply_message(event.reply_token, msg)
 
         else:
             if text == '開啟聊天':
