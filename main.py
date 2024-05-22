@@ -317,8 +317,8 @@ def view_records():
     cur = conn.cursor()
 
     cur.execute("SELECT user_id, my_love FROM Love_place")
-    # cur.execute("SELECT user_id, want FROM my_want")
-    # cur.execute("SELECT user_id, been_to FROM been_to")
+    cur.execute("SELECT user_id, want FROM my_want")
+    cur.execute("SELECT user_id, been_to FROM been_to")
     records = cur.fetchall()
 
     result_text = ""
@@ -457,9 +457,6 @@ def handle_text_message(event):
         elif text == "我需要推薦網站":
             pass
 
-        elif text == "查看紀錄":
-            pass
-            
         elif text == "天氣資訊":
             msg = TextSendMessage(text="請選擇想知道的資訊，如需詳細資訊請使用line內建傳送位置資訊",
                 quick_reply=QuickReply(
