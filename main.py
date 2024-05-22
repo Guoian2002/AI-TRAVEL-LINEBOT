@@ -243,7 +243,7 @@ def get_data_from_db( dis ):
 
 user_states = {}
 user_relations = {}
-#將使用將使用者資料寫入到friend資料庫
+#將使用者資料寫入到friend資料庫
 def insert_into_db(user_id, relation, phone_number):
     params = urlparse(unquote(DATABASE_URL))
     conn = psycopg2.connect(
@@ -305,21 +305,21 @@ def split_bullet_points(text):
     # 去除第一個元素，因為在第一個列點之前的部分會是空字串
     return title, points[1:]
 
-# 控制輸出的字數
-def generate_reply_messages(response, user_id):
-    messages = []
+# # 控制輸出的字數
+# def generate_reply_messages(response, user_id):
+#     messages = []
 
-    # 檢查文字是否為列點式的格式
-    title, parts = split_bullet_points(response)
-    if(len(parts) != 0):
-        messages.append(TextSendMessage(text=title, quick_reply=QuickReply(
-                items=[QuickReplyButton(action=MessageAction(label="繼續", text="繼續"))])))
-        for part in parts:
-            messages.append(TextSendMessage(text=part, quick_reply=QuickReply(
-                items=[QuickReplyButton(action=MessageAction(label="繼續", text="繼續"))])))
-    else:
-        messages.append(TextSendMessage(text=response, quick_reply=QuickReply(
-                items=[QuickReplyButton(action=MessageAction(label="繼續", text="繼續"))])))
+#     # 檢查文字是否為列點式的格式
+#     title, parts = split_bullet_points(response)
+#     if(len(parts) != 0):
+#         messages.append(TextSendMessage(text=title, quick_reply=QuickReply(
+#                 items=[QuickReplyButton(action=MessageAction(label="繼續", text="繼續"))])))
+#         for part in parts:
+#             messages.append(TextSendMessage(text=part, quick_reply=QuickReply(
+#                 items=[QuickReplyButton(action=MessageAction(label="繼續", text="繼續"))])))
+#     else:
+#         messages.append(TextSendMessage(text=response, quick_reply=QuickReply(
+#                 items=[QuickReplyButton(action=MessageAction(label="繼續", text="繼續"))])))
     # else:
     #     response_len = len(response)
     #     remaining_response = response
