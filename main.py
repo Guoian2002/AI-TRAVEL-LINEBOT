@@ -430,7 +430,8 @@ def handle_text_message(event):
         elif text == "我需要推薦網站":
             pass
 
-
+        elif text == "查看紀錄":
+            pass
             
         elif text == "天氣資訊":
             msg = TextSendMessage(text="請選擇想知道的資訊，如需詳細資訊請使用line內建傳送位置資訊",
@@ -469,7 +470,7 @@ def handle_text_message(event):
 
         elif text == "我的最愛":
             msg = TextSendMessage(
-                text="選擇想記錄的地方",
+                text="選擇分類",
                 quick_reply=QuickReply(
                     items=[
                         QuickReplyButton(
@@ -489,6 +490,7 @@ def handle_text_message(event):
                 )
             )
 
+        #最愛的地方
         elif text == '最愛的地方':
             user_state[user_id] = 'input_my_love'
             msg = TextSendMessage(text="現在可以隨意輸入")
@@ -500,14 +502,34 @@ def handle_text_message(event):
             msg = TextSendMessage(text="已經將你的最愛的地方加入了！")
             # 回傳訊息
             line_bot_api.reply_message(event.reply_token, msg)
-            
-        elif text == '想去的地方':
-            add_to_want(user_id, text)
-            msg = TextSendMessage(text="現在可以隨意輸入")
 
-        elif text == '已去過的地方':
-            add_to_been_to(user_id, text)
+        #想去的地方
+        elif text == '想去的地方':
+            user_state[user_id] = 'input_want'
             msg = TextSendMessage(text="現在可以隨意輸入")
+            # 回傳訊息
+            line_bot_api.reply_message(event.reply_token, msg)
+        elif user_state.get(user_id) == 'input_want':
+            add_to_want(user_id, text)
+            user_state[user_id] = None
+            msg = TextSendMessage(text="已經將你想去的地方加入了！")
+            # 回傳訊息
+            line_bot_api.reply_message(event.reply_token, msg)
+
+
+        #已去過的地方
+        elif text == '已去過的地方':
+            user_state[user_id] = 'input_been_to'
+            msg = TextSendMessage(text="現在可以隨意輸入")
+            # 回傳訊息
+            line_bot_api.reply_message(event.reply_token, msg)
+        elif user_state.get(user_id) == 'input_been_to':
+            add_to_been_to(user_id, text)
+            user_state[user_id] = None
+            msg = TextSendMessage(text="已經將你已經去過的地方加入了！")
+            # 回傳訊息
+            line_bot_api.reply_message(event.reply_token, msg)
+
 
 
         else:
