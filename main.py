@@ -317,8 +317,8 @@ def view_records():
     cur = conn.cursor()
 
     cur.execute("SELECT user_id, my_love FROM Love_place")
-    cur.execute("SELECT user_id, want FROM my_want")
-    cur.execute("SELECT user_id, been_to FROM been_to")
+    # cur.execute("SELECT user_id, want FROM my_want")
+    # cur.execute("SELECT user_id, been_to FROM been_to")
     records = cur.fetchall()
 
     result_text = ""
