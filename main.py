@@ -195,6 +195,8 @@ DATABASE_URL = os.environ['DATABASE_URL']
 import psycopg2
 from urllib.parse import urlparse, unquote
 
+user_state = {}
+
 def add_to_my_love(user_id, new_love):
     params = urlparse(unquote(DATABASE_URL))
 
@@ -479,15 +481,26 @@ def handle_text_message(event):
                         QuickReplyButton(
                             action=MessageAction(label="已去過的地方", text="已去過的地方")
                         ),
+                        QuickReplyButton(
+                            action=MessageAction(label="查看紀錄", text="查看紀錄")
+                        ),
                      
                     ]
                 )
             )
 
         elif text == '最愛的地方':
-            add_to_my_love(user_id, text)
+            user_state[user_id] = 'input_my_love'
             msg = TextSendMessage(text="現在可以隨意輸入")
-
+            # 回傳訊息
+            line_bot_api.reply_message(event.reply_token, msg)
+        elif user_state.get(user_id) == 'input_my_love':
+            add_to_my_love(user_id, text)
+            user_state[user_id] = None
+            msg = TextSendMessage(text="已經將你的最愛的地方加入了！")
+            # 回傳訊息
+            line_bot_api.reply_message(event.reply_token, msg)
+            
         elif text == '想去的地方':
             add_to_want(user_id, text)
             msg = TextSendMessage(text="現在可以隨意輸入")
