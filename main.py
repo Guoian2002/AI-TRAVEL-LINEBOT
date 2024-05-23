@@ -304,7 +304,8 @@ def add_to_been_to(user_id, new_been_to):
     cur.close()
     conn.close()
 
-def view_records():
+
+def view_records(user_id):
     params = urlparse(unquote(DATABASE_URL))
     conn = psycopg2.connect(
         dbname=params.path[1:],
@@ -316,15 +317,22 @@ def view_records():
 
     cur = conn.cursor()
 
-    cur.execute("SELECT user_id, my_love FROM Love_place")
-    # cur.execute("SELECT user_id, want FROM my_want")
-    # cur.execute("SELECT user_id, been_to FROM been_to")
-    records = cur.fetchall()
+    # 查詢 love_table 中對應 user_id 的資料
+    cur.execute("SELECT my_love FROM love_place WHERE user_id = %s", (user_id,))
+    love_record = cur.fetchone()
+    my_love = love_record[0] if love_record else "無資料"
 
-    result_text = ""
-    for record in records:
-        user_id, my_love = record
-        result_text += f"user_id: {user_id}\n my_love: {my_love}\n"
+    # 查詢 want_table 中對應 user_id 的資料
+    cur.execute("SELECT want FROM my_want WHERE user_id = %s", (user_id,))
+    want_record = cur.fetchone()
+    want = want_record[0] if want_record else "無資料"
+
+    # 查詢 been_to_table 中對應 user_id 的資料
+    cur.execute("SELECT been_to FROM been_to WHERE user_id = %s", (user_id,))
+    been_to_record = cur.fetchone()
+    been_to = been_to_record[0] if been_to_record else "無資料"
+
+    result_text = f"user_id: {user_id}\nmy_love: {my_love}\nwant: {want}\nbeen_to: {been_to}\n"
 
     conn.commit()
     cur.close()
@@ -555,7 +563,7 @@ def handle_text_message(event):
             line_bot_api.reply_message(event.reply_token, msg)
 
         elif text == '查看紀錄':
-            records = view_records()
+            records = view_records(user_id)
             msg = TextSendMessage(text=records)
             line_bot_api.reply_message(event.reply_token, msg)
 
