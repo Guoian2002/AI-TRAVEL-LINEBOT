@@ -470,6 +470,11 @@ def handle_text_message(event):
             msg = TextSendMessage(text="請選擇想知道的資訊，如需詳細資訊請使用line內建傳送位置資訊",
                 quick_reply=QuickReply(
                     items=[
+
+                         QuickReplyButton(
+                            action=MessageAction(label="詳細天氣", text="詳細天氣")
+                        ),
+
                         QuickReplyButton(
                             action=MessageAction(label="雷達回波", text="雷達回波")
                         ),
@@ -567,6 +572,22 @@ def handle_text_message(event):
             records = view_records(user_id)
             msg = TextSendMessage(text=records)
             line_bot_api.reply_message(event.reply_token, msg)
+
+        elif text == "詳細天氣":
+            msg = TextSendMessage(
+                text="請傳送您的位置",
+                quick_reply=QuickReply(
+                    items=[
+                        QuickReplyButton(
+                            action=LocationAction(label="傳送位置")
+                        )
+                    ]
+                )
+            )
+            line_bot_api.reply_message(event.reply_token, msg)
+
+
+        
 
         else:
             if text == '開啟聊天':
@@ -673,7 +694,7 @@ def handle_audio_message(event):
     except ValueError:
         msg = TextSendMessage(text='請先註冊你的 API Token，格式為 /註冊 [API TOKEN]')
     except KeyError:
-        msg = TextSendMessage(text='請先註冊 Token，格式為 /註冊 sk-xxxxx')
+        msg = TextSendMessage(text='TAIDE 不支援語音歐~')
     except Exception as e:
         memory.remove(user_id)
         if str(e).startswith('Incorrect API key provided'):
