@@ -451,12 +451,7 @@ def handle_text_message(event):
                     ]
                 )
             )
-        elif text == "文字":
-            msg = TextSendMessage(text="可以用語音跟emo聊天嘍~")
 
-        elif text == "語音":
-            msg = TextSendMessage(text="近期即將推出，敬請期待")
-        
         elif text == "雷達回波":
             msg = weather(event)
 
@@ -467,7 +462,7 @@ def handle_text_message(event):
             pass
 
         elif text == "天氣資訊":
-            msg = TextSendMessage(text="請選擇想知道的資訊，如需詳細資訊請使用line內建傳送位置資訊",
+            msg = TextSendMessage(text="請選擇想知道的資訊",
                 quick_reply=QuickReply(
                     items=[
 
@@ -586,9 +581,6 @@ def handle_text_message(event):
             )
             line_bot_api.reply_message(event.reply_token, msg)
 
-
-        
-
         else:
             if text == '開啟聊天':
                 memory.chats[user_id] = True
@@ -645,7 +637,7 @@ def handle_text_message(event):
 
 
     except ValueError:
-        msg = TextSendMessage(text='Token 無效，請重新註冊，格式為 /註冊 sk-xxxxx')
+        msg = TextSendMessage(text='TAIDE ValueError')
     except KeyError as e:
         logger.info(e)
         msg = TextSendMessage(text='TAIDE 休息中~')
