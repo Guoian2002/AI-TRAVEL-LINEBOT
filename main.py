@@ -332,13 +332,14 @@ def view_records(user_id):
     been_to_record = cur.fetchone()
     been_to = been_to_record[0] if been_to_record else "無資料"
 
-    result_text = f"user_id: {user_id}\nmy_love: {my_love}\nwant: {want}\nbeen_to: {been_to}\n"
+    result_text = f"我的最愛: {my_love}\n 想去的地方: {want}\n 曾經去過的地方: {been_to}\n"
 
     conn.commit()
     cur.close()
     conn.close()
 
     return result_text.strip()
+
 # 天氣
 def weather(event):
     try:
