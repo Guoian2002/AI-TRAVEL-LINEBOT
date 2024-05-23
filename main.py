@@ -502,6 +502,7 @@ def handle_text_message(event):
             )
 
         elif text == "我的最愛":
+            user_state[user_id] = "my_love"
             msg = TextSendMessage(
                 text="選擇分類",
                 quick_reply=QuickReply(
@@ -559,7 +560,7 @@ def handle_text_message(event):
         elif user_state.get(user_id) == 'input_been_to':
             add_to_been_to(user_id, text)
             user_state[user_id] = None
-            msg = TextSendMessage(text="已經將你已經去過的地方加入了！")
+            msg = TextSendMessage(text="已經將你已去過的地方加入了！")
             # 回傳訊息
             line_bot_api.reply_message(event.reply_token, msg)
 
