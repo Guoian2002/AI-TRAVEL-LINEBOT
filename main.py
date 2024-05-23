@@ -321,19 +321,19 @@ def view_records(user_id):
     cur.execute("SELECT my_love FROM love_place WHERE user_id = %s", (user_id,))
     love_record = cur.fetchone()
     my_love = love_record[0] if love_record else "無資料"
-    my_love = set(my_love.split(" "))
+    my_love = ", ".join(set(my_love.split(" ")))
 
     # 查詢 want_table 中對應 user_id 的資料
     cur.execute("SELECT want FROM my_want WHERE user_id = %s", (user_id,))
     want_record = cur.fetchone()
     want = want_record[0] if want_record else "無資料"
-    want = set(want.split(" "))
+    want = ", ".join(set(want.split(" ")))
 
     # 查詢 been_to_table 中對應 user_id 的資料
     cur.execute("SELECT been_to FROM been_to WHERE user_id = %s", (user_id,))
     been_to_record = cur.fetchone()
     been_to = been_to_record[0] if been_to_record else "無資料"
-    been_to = set(been_to.split(" "))
+    been_to = ", ".join(set(been_to.split(" ")))
 
     result_text = f"我的最愛: {my_love}\n 想去的地方: {want}\n 曾經去過的地方: {been_to}\n"
 
